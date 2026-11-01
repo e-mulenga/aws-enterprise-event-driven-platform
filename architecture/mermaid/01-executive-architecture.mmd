@@ -11,7 +11,7 @@ graph TB
     subgraph LZ["AWS Enterprise Landing Zone (consumed, never recreated)"]
         VPC[VPC + Subnets af-south-1 / eu-west-1]
         LOG[CloudTrail / Config / GuardDuty buckets]
-        DNS[Route 53 Zone: emulenga.com]
+        DNS[Route 53 Zone: yourdomain.com]
         OIDC[GitHub OIDC Provider]
         AI_GOV[Bedrock Guardrails + AI Audit Bucket]
     end
