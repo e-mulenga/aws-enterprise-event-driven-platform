@@ -1,0 +1,21 @@
+%% EventBridge Architecture
+graph TB
+    BUS["Custom Event Bus: shopsphere-&lt;env&gt;-events"]
+    ARCHIVE["Archive (Event Replay)\nretention: event_retention_days"]
+
+    R1["Rule: orders-domain-events\nsource=shopsphere.orders\ndetail-type=OrderCreated|OrderUpdated|OrderCancelled"]
+    R2["Rule: inventory-domain-events\nsource=shopsphere.inventory"]
+    R3["Rule: business-events\ndetail-type=OrderStatusChanged"]
+    R4["Rule: integration-events\nsource=shopsphere.partner-integration"]
+    R5["Rule: ai-routing-requested\n(enable_ai_integration only)"]
+
+    BUS --> ARCHIVE
+    BUS --> R1 --> SQ1[SQS: orders queue]
+    BUS --> R2 --> SQ2[SQS: inventory queue]
+    BUS --> R3 --> SNS1[SNS: order-events topic]
+    BUS --> R4
+    BUS --> R5 --> L1[Lambda: ai_event_router]
+
+    R1 -.on delivery failure.-> DLQ[DLQ: eventbridge-rule-targets]
+    R2 -.on delivery failure.-> DLQ
+    R3 -.on delivery failure.-> DLQ

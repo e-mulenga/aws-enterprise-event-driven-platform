@@ -1,0 +1,28 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Real environment values — never commit (use the .example files)
+environments/*/terraform.tfvars
+environments/*/backend.hcl
+
+# OS / editor
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Packaging / scratch
+*.zip
+backups/

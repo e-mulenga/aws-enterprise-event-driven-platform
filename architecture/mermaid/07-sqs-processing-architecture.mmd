@@ -1,0 +1,18 @@
+%% SQS Processing Architecture
+graph LR
+    subgraph Standard["Standard Queues"]
+        ORD[orders]
+        INV[inventory]
+        NOT[notifications]
+    end
+    subgraph Fifo["FIFO Queue"]
+        PAY["payments.fifo\n(strict order, content-based dedup)"]
+    end
+
+    ORD --> ORDW[orders_worker Lambda] --> ORDDLQ[orders-dlq]
+    INV --> INVW[inventory_worker Lambda] --> INVDLQ[inventory-dlq]
+    NOT -.future consumer.-> NOTDLQ[notifications-dlq]
+    PAY -.future consumer.-> PAYDLQ[payments-dlq]
+
+    ORDDLQ -.maxReceiveCount=5.-> ORD
+    INVDLQ -.maxReceiveCount=5.-> INV

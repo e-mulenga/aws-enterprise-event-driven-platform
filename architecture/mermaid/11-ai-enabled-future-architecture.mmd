@@ -1,0 +1,16 @@
+%% AI-Enabled Future Architecture
+graph LR
+    EB[EventBridge Bus] -->|AIRoutingRequested| ROUTER[ai_event_router Lambda]
+    ROUTER -->|InvokeModel + guardrailIdentifier| BEDROCK[Amazon Bedrock]
+    GUARDRAIL["Landing Zone Bedrock Guardrail\n(bedrock_guardrail_id — consumed, never created)"] -.applies to.-> BEDROCK
+    POLICY["Landing Zone approved-models IAM policy\n(consumed, never created)"] -.restricts.-> ROUTER
+    ROUTER -->|audit record| AUDITBUCKET["Landing Zone AI Audit Bucket\nprefix: event-platform/ai-router/"]
+
+    subgraph Future["Future Use Cases (not yet implemented)"]
+        F1[Intelligent Event Routing]
+        F2[Automated Incident Summaries]
+        F3[AI-Assisted Business Workflows]
+    end
+    ROUTER -.extends to.-> F1
+    ROUTER -.extends to.-> F2
+    ROUTER -.extends to.-> F3

@@ -1,0 +1,51 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.tf'
+      - 'environments/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to apply'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, test, prod]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }} # prod environment requires a manual approval gate, configured in repo Settings -> Environments
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC — Landing Zone's existing provider)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/shopsphere-${{ github.event.inputs.environment || 'dev' }}-event-platform-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: '1.8.x'
+
+      - name: Init
+        run: tofu init -backend-config=environments/${{ github.event.inputs.environment || 'dev' }}/backend.hcl
+
+      - name: Apply
+        run: |
+          tofu apply -auto-approve \
+            -var-file=environments/${{ github.event.inputs.environment || 'dev' }}/terraform.tfvars
+
+      - name: Post-deploy validation
+        run: bash validation/validate-event-platform.sh ${{ github.event.inputs.environment || 'dev' }}

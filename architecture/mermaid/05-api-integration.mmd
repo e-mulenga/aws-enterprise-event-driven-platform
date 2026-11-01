@@ -1,0 +1,8 @@
+%% API Integration Diagram
+graph LR
+    CLIENT[External / Internal Client] -->|HTTPS| DOMAIN["api.&lt;env&gt;.emulenga.com\n(Landing Zone Route 53 zone + ACM cert)"]
+    DOMAIN --> APIGW[API Gateway HTTP API]
+    APIGW -->|CORS, throttling 100 rps / 200 burst| ROUTE["POST /orders"]
+    ROUTE -->|AWS_PROXY v2.0| LAMBDA[api_handler Lambda]
+    LAMBDA --> LOGS[CloudWatch Access Logs]
+    LAMBDA --> XRAY[X-Ray Trace]

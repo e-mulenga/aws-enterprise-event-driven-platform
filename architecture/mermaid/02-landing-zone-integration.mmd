@@ -1,0 +1,17 @@
+%% Landing Zone Integration Diagram
+graph LR
+    subgraph LZState["Landing Zone Terraform State (S3, us-east-1)"]
+        TFSTATE[(landing-zone/&lt;env&gt;/terraform.tfstate)]
+    end
+
+    subgraph ThisRepo["This Repository"]
+        LZDATA["modules/landingzone-data\n(sole remote-state reader)"]
+        LOCALS["Root locals.tf: local.lz.*"]
+        MODS["All other modules\n(api-gateway, eventbridge, sqs, sns,\nlambda, dynamodb, security,\nmonitoring, ai-integration, disaster-recovery)"]
+    end
+
+    TFSTATE -->|terraform_remote_state data source| LZDATA
+    LZDATA -->|normalized outputs| LOCALS
+    LOCALS -->|explicit input variables only| MODS
+
+    MODS -.NEVER reads terraform_remote_state directly.-> TFSTATE

@@ -1,0 +1,36 @@
+%% Security Architecture Diagram
+graph TB
+    subgraph Identity["Identity"]
+        SSO[IAM Identity Center — Landing Zone]
+        ROLE[Lambda Execution Role\nleast-privilege, per-function inline policies]
+    end
+
+    subgraph DataProtection["Encryption"]
+        DEVKEY[Dev/Test: AWS-managed keys\naws/sqs aws/s3 aws/lambda]
+        PRODKEY[Prod: Customer Managed Keys\neventbridge-prod-key / sqs-prod-key / dynamodb-prod-key]
+    end
+
+    subgraph Secrets["Secrets"]
+        SM[Secrets Manager\npartner API credentials]
+    end
+
+    subgraph Network["Network (Landing Zone VPC — consumed)"]
+        SG[Lambda Security Group\negress-only]
+        PRIVSUB[Private Subnets]
+    end
+
+    subgraph Governance["Governance (Landing Zone — consumed)"]
+        CT[CloudTrail]
+        CFG[AWS Config]
+        BR[Bedrock Guardrails]
+    end
+
+    SSO --> ROLE
+    ROLE --> SG
+    SG --> PRIVSUB
+    ROLE --> SM
+    ROLE -.scoped KMS actions.-> DEVKEY
+    ROLE -.scoped KMS actions.-> PRODKEY
+    ROLE -.audited by.-> CT
+    ROLE -.evaluated by.-> CFG
+    ROLE -.AI calls governed by.-> BR

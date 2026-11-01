@@ -1,0 +1,30 @@
+environment = "dev"
+
+landing_zone_state_bucket = "REPLACE-ME-state-bucket"
+landing_zone_state_key    = "landing-zone/dev/terraform.tfstate"
+landing_zone_state_region = "us-east-1"
+
+primary_region = "af-south-1"
+dr_region      = "eu-west-1"
+
+kms_strategy = "aws-managed" # Dev uses AWS-managed keys — see the cost-optimization statement in docs/cost-analysis.md
+
+event_retention_days            = 14
+enable_cross_region_replication = false # off in dev to avoid a second-bucket + replication-role cost for throwaway data
+enable_dlq                       = true
+enable_event_replay              = true
+enable_global_tables             = false
+message_retention_seconds        = 345600
+dlq_max_receive_count            = 5
+
+enable_xray_tracing       = true
+enable_managed_grafana    = false
+lambda_log_retention_days = 14
+alert_email                = ""
+
+enable_ai_integration = false
+enable_custom_domain  = false
+
+additional_tags = {
+  Owner = "REPLACE-ME"
+}

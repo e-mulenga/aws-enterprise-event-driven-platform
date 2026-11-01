@@ -1,0 +1,25 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Disaster Recovery">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Disaster Recovery" style="text;html=1;fontSize=20;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="20" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="n0" value="af-south-1 Primary (API GW, DynamoDB, S3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="60" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" value="eu-west-1 DR (DynamoDB Global Table replica, S3 CRR replica)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="280" y="60" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="Route 53 Health Check" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="540" y="60" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="Manual compute-layer failover (runbooks/dr-failover.md)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="150" width="230" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

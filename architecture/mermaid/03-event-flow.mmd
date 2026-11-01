@@ -1,0 +1,24 @@
+%% Event Flow Diagram — reference flows expanded
+sequenceDiagram
+    participant C as Client
+    participant AG as API Gateway
+    participant L1 as api_handler Lambda
+    participant DDB as DynamoDB (orders)
+    participant EB as EventBridge Bus
+    participant SQ as SQS (orders queue)
+    participant L2 as orders_worker Lambda
+    participant DLQ as DLQ
+
+    C->>AG: POST /orders
+    AG->>L1: AWS_PROXY invoke
+    L1->>DDB: PutItem (status=RECEIVED)
+    L1->>EB: PutEvents (OrderCreated)
+    AG-->>C: 201 {order_id}
+    EB->>SQ: Rule target (orders-domain-events)
+    SQ->>L2: Event source mapping (batch)
+    alt processing succeeds
+        L2->>DDB: UpdateItem (status=PROCESSED)
+    else processing fails after maxReceiveCount retries
+        SQ->>DLQ: Message moved to DLQ
+        Note over DLQ: runbooks/dlq-handling.md
+    end

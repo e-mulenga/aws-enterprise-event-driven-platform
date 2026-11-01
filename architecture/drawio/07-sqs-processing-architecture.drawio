@@ -1,0 +1,34 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="SQS Processing Architecture">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="SQS Processing Architecture" style="text;html=1;fontSize=20;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="20" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="n0" value="orders (Standard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="60" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" value="inventory (Standard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="280" y="60" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="notifications (Standard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="540" y="60" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="payments (FIFO)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="150" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="orders_worker Lambda" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="280" y="150" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="inventory_worker Lambda" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="540" y="150" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="Per-queue DLQs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="240" width="230" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

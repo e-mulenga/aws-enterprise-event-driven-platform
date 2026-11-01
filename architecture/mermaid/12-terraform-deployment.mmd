@@ -1,0 +1,17 @@
+%% Terraform Deployment Diagram
+graph TB
+    DEV[environments/dev] -->|terraform init -backend-config| STATE[(S3 State Bucket, us-east-1\nkey: event-driven-platform/&lt;env&gt;/terraform.tfstate)]
+    TEST[environments/test] --> STATE
+    PROD[environments/prod] --> STATE
+
+    PR[Pull Request] --> PLANWF[.github/workflows/plan.yml]
+    PLANWF -->|OIDC AssumeRoleWithWebIdentity| OIDC[Landing Zone GitHub OIDC Provider]
+    PLANWF --> PLANGUARD[scripts/plan-guard.sh]
+
+    MAIN[Push to main / manual dispatch] --> APPLYWF[.github/workflows/apply.yml]
+    APPLYWF -->|OIDC| OIDC
+    APPLYWF --> APPLY[tofu apply]
+    APPLY --> VALIDATE[validation/validate-event-platform.sh]
+
+    SCAN[.github/workflows/security-scan.yml] --> TFLINT[tflint]
+    SCAN --> CHECKOV[checkov]

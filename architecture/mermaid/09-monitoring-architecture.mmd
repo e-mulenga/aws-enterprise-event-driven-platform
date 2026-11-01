@@ -1,0 +1,31 @@
+%% Monitoring Architecture
+graph TB
+    subgraph Sources["Metric Sources"]
+        SQS_M[SQS: ApproximateNumberOfMessagesVisible]
+        LAMBDA_M[Lambda: Errors / Throttles / Duration]
+        EB_M[EventBridge: FailedInvocations / ThrottledRules]
+        APIGW_M[API Gateway: 4xx / 5xx]
+        XRAY_T[X-Ray Traces]
+    end
+
+    subgraph Observability["modules/monitoring (owned here — distinct from the Landing Zone dashboard)"]
+        DASH[CloudWatch Dashboard]
+        ALARM1[Alarm: DLQ not empty]
+        ALARM2[Alarm: Lambda errors]
+        ALARM3[Alarm: Lambda throttles]
+        GRAFANA["Amazon Managed Grafana (optional)"]
+    end
+
+    SQS_M --> DASH
+    LAMBDA_M --> DASH
+    EB_M --> DASH
+    APIGW_M --> DASH
+    XRAY_T --> DASH
+
+    SQS_M --> ALARM1
+    LAMBDA_M --> ALARM2
+    LAMBDA_M --> ALARM3
+    ALARM1 --> SNS[SNS: platform-alerts]
+    ALARM2 --> SNS
+    ALARM3 --> SNS
+    DASH -.optional.-> GRAFANA

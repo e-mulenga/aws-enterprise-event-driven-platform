@@ -1,0 +1,50 @@
+%% Executive Architecture Diagram
+%% aws-enterprise-event-driven-platform — ShopSphere Global
+graph TB
+    subgraph Clients["Event Sources"]
+        REST[REST API Clients]
+        PARTNER[Partner Integrations]
+        FILES[Bulk File Imports]
+        SCHED[Scheduled Events]
+    end
+
+    subgraph LZ["AWS Enterprise Landing Zone (consumed, never recreated)"]
+        VPC[VPC + Subnets af-south-1 / eu-west-1]
+        LOG[CloudTrail / Config / GuardDuty buckets]
+        DNS[Route 53 Zone: emulenga.com]
+        OIDC[GitHub OIDC Provider]
+        AI_GOV[Bedrock Guardrails + AI Audit Bucket]
+    end
+
+    subgraph Platform["Event-Driven Platform (this repository)"]
+        APIGW[API Gateway HTTP API]
+        EB[EventBridge Custom Bus]
+        SQSQ[SQS Queues + DLQs]
+        SNST[SNS Topics]
+        LAMBDA[Lambda: API handler + Workers]
+        DDB[(DynamoDB: Orders / Profiles / Event Metadata)]
+        S3A[(S3 Event Archive, versioned + CRR)]
+        MON[CloudWatch Dashboard + Alarms]
+        AIINT[AI Integration — consumes LZ guardrails]
+    end
+
+    REST --> APIGW
+    PARTNER --> EB
+    FILES --> S3A
+    SCHED --> EB
+
+    APIGW --> LAMBDA
+    LAMBDA --> SQSQ
+    SQSQ --> LAMBDA
+    LAMBDA --> DDB
+    EB --> SQSQ
+    EB --> SNST
+    LAMBDA --> EB
+    EB --> AIINT
+    AIINT --> AI_GOV
+
+    Platform -.deploys into.-> VPC
+    Platform -.logs via.-> LOG
+    Platform -.domain via.-> DNS
+    Platform -.CI/CD auth via.-> OIDC
+    MON -.observes.-> Platform

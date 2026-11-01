@@ -1,0 +1,32 @@
+environment = "prod"
+
+landing_zone_state_bucket = "REPLACE-ME-state-bucket"
+landing_zone_state_key    = "landing-zone/prod/terraform.tfstate"
+landing_zone_state_region = "us-east-1"
+
+primary_region = "af-south-1"
+dr_region      = "eu-west-1"
+
+kms_strategy = "customer-managed" # Prod uses CMKs — see the cost-optimization statement in docs/cost-analysis.md
+
+event_retention_days            = 30
+enable_cross_region_replication = true
+enable_dlq                       = true
+enable_event_replay              = true
+enable_global_tables             = true # meets the 5-minute RPO target across Regions — see docs/dr-strategy.md
+message_retention_seconds        = 1209600
+dlq_max_receive_count            = 5
+
+enable_xray_tracing       = true
+enable_managed_grafana    = true
+lambda_log_retention_days = 90
+alert_email                = "emmanuelmulenga1207@gmail.com"
+
+enable_ai_integration = true
+enable_custom_domain  = true
+
+additional_tags = {
+  Owner        = "REPLACE-ME"
+  CostCenter   = "shopsphere-platform"
+  DataClass    = "confidential"
+}

@@ -1,0 +1,20 @@
+%% Disaster Recovery Diagram
+graph TB
+    subgraph Primary["af-south-1 (Primary)"]
+        P_API[API Gateway]
+        P_DDB[(DynamoDB Global Tables)]
+        P_S3[(S3 Event Archive)]
+        P_HC[Route 53 Health Check]
+    end
+
+    subgraph DR["eu-west-1 (DR)"]
+        D_DDB[(DynamoDB Global Tables replica)]
+        D_S3[(S3 Event Archive — CRR replica)]
+    end
+
+    P_DDB <-->|Global Tables replication, seconds| D_DDB
+    P_S3 -->|Cross-Region Replication| D_S3
+    P_HC -->|failure detected| FAILOVER[runbooks/dr-failover.md:\nmanual compute-layer deploy to eu-west-1]
+    FAILOVER --> DR
+
+    Note["RTO: 15 min / RPO: 5 min\nCompute layer (Lambda/API GW/EventBridge/SQS/SNS)\nis NOT pre-warmed in DR — see cost-analysis.md"]

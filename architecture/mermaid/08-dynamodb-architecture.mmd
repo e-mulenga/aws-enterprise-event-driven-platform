@@ -1,0 +1,16 @@
+%% DynamoDB Architecture
+erDiagram
+    CUSTOMER_PROFILES {
+        string customer_id PK
+    }
+    ORDERS {
+        string order_id PK
+        string customer_id "GSI: by-customer"
+        string status
+    }
+    EVENT_METADATA {
+        string event_id PK
+        string event_timestamp SK
+        string event_type
+    }
+    ORDERS ||--o{ CUSTOMER_PROFILES : "customer_id (GSI)"
