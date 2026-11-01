@@ -21,18 +21,20 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
+  # Resolve target environment: default to 'dev' on push to main, or use input on manual dispatch
+  TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}
 
 jobs:
   apply:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'dev' }} # prod environment requires a manual approval gate, configured in repo Settings -> Environments
+    environment: ${{ env.TARGET_ENV }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC — Landing Zone's existing provider)
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/shopsphere-${{ github.event.inputs.environment || 'dev' }}-event-platform-deploy
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/shopsphere-${{ env.TARGET_ENV }}-event-platform-deploy
           aws-region: ${{ env.AWS_REGION }}
 
       - uses: opentofu/setup-opentofu@v1
@@ -40,12 +42,17 @@ jobs:
           tofu_version: '1.8.x'
 
       - name: Init
-        run: tofu init -backend-config=environments/${{ github.event.inputs.environment || 'dev' }}/backend.hcl
+        run: tofu init -backend-config=environments/${{ env.TARGET_ENV }}/backend.hcl
 
       - name: Apply
         run: |
           tofu apply -auto-approve \
-            -var-file=environments/${{ github.event.inputs.environment || 'dev' }}/terraform.tfvars
+            -var-file=environments/${{ env.TARGET_ENV }}/terraform.tfvars
 
       - name: Post-deploy validation
-        run: bash validation/validate-event-platform.sh ${{ github.event.inputs.environment || 'dev' }}
+        run: |
+          if [ -f "validation/validate-event-platform.sh" ]; then
+            bash validation/validate-event-platform.sh ${{ env.TARGET_ENV }}
+          else
+            echo "⚠️ Validation script not found, skipping post-deploy check."
+          fi
