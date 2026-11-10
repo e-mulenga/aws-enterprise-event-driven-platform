@@ -7,8 +7,8 @@ data "terraform_remote_state" "landing_zone" {
   backend = "s3"
 
   config = {
-    bucket = var.state_bucket
-    key    = var.state_key
-    region = var.state_region
+    bucket = var.landing_zone_state_bucket
+    key    = var.landing_zone_state_key
+    region = var.landing_zone_state_region
   }
 }
