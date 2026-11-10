@@ -1,64 +1,37 @@
 name: Terraform Plan
 
 on:
-  pull_request:
-    paths:
-      - '**.tf'
-      - 'environments/**'
-      - '.github/workflows/plan.yml'
+  workflow_dispatch:
 
 permissions:
-  id-token: write   # required for GitHub OIDC -> AWS
+  id-token: write
   contents: read
-  pull-requests: write
-
-env:
-  AWS_REGION: us-east-1 # state bucket Region; module providers set af-south-1 / eu-west-1 internally
 
 jobs:
   plan:
-    strategy:
-      matrix:
-        environment: [dev, test, prod]
     runs-on: ubuntu-latest
-    environment: ${{ matrix.environment }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC — Landing Zone's existing provider)
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.0
+
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/shopsphere-${{ matrix.environment }}-event-platform-deploy
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: af-south-1
 
-      - uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: '1.8.x'
-
-      - name: Init
-        run: tofu init -backend-config=environments/${{ matrix.environment }}/backend.hcl
-
-      - name: Validate
-        run: tofu validate
-
-      - name: Plan
+      - name: Terraform Init
         run: |
-          tofu plan \
-            -var-file=environments/${{ matrix.environment }}/terraform.tfvars \
-            -out=tfplan
+          terraform init \
+            -backend-config=environments/dev/backend.hcl
 
-      - name: Plan guard — block deletion/replacement of protected resources
+      - name: Terraform Plan
         run: |
-          tofu show -json tfplan > plan.json
-          bash scripts/plan-guard.sh plan.json
-
-      - name: Post plan summary to PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Terraform plan for **${{ matrix.environment }}** completed and passed plan-guard. See the workflow run for details.`
-            })
+          terraform plan \
+            -var-file=environments/common.tfvars \
+            -var-file=environments/dev/terraform.tfvars

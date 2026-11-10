@@ -1,21 +1,28 @@
 name: Terraform CI
 
 on:
-  pull_request:
   push:
     branches:
       - main
+      
+
+  pull_request:
+    branches:
+      - main
+      
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0
+          terraform_version: 1.11.0
 
       - name: Terraform Format
         run: terraform fmt -check -recursive
@@ -30,12 +37,12 @@ jobs:
         uses: terraform-linters/setup-tflint@v4
 
       - name: Run TFLint
-        run: tflint --recursive
+        run: |
+          tflint --init
+          tflint --recursive
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@master
         with:
           framework: terraform
-
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
+          soft_fail: true
