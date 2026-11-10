@@ -16,7 +16,12 @@ variable "landing_zone_state_key" {
 variable "landing_zone_state_region" {
   description = "Region of the Landing Zone state bucket."
   type        = string
-  default     = "us-east-1"
+  default     = ""
+}
+
+variable "enable_remote_state" {
+  type    = bool
+  default = true
 }
 
 # ---- Core -------------------------------------------------------------------
